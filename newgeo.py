@@ -461,10 +461,10 @@ with tab3:
         "Select Insert Paper Target:", 
         options=["insert_p1", "insert_p2", "insert_p3", "insert_p4"],
         format_func=lambda x: {
-            "insert_p1": "Insert Paper 1 (Insertpyp_P1P3)",
-            "insert_p2": "Insert Paper 2 (Insertpyp_P2P4)",
-            "insert_p3": "Insert Paper 3 (Insertpyp_P1P3)",
-            "insert_p4": "Insert Paper 4 (Insertpyp_P2P4)"
+            "insert_p1": "Insert Materials from Paper 1",
+            "insert_p2": "Insert Materials from Paper 2",
+            "insert_p3": "Insert Materials from Paper 3",
+            "insert_p4": "Insert Materials from Paper 4"
         }[x],
         key="select_insert_target"
     )
@@ -518,7 +518,7 @@ with tab3:
 
 # --- TAB 4: DOWNLOAD MARK SCHEME ---
 with tab4:
-    st.subheader("🔑 Download Answer / Mark Schemes")
+    st.subheader("🔑 Download PYP Marking Schemes")
     
     col_y, col_m, col_v = st.columns([1, 2, 2])
     with col_y:
@@ -552,16 +552,16 @@ with tab4:
             break
 
     if found_ms_path:
-        st.success(f"Found Answer Scheme: `{expected_ms_filename}`")
+        st.success(f"Found Marking Scheme: `{expected_ms_filename}`")
         with open(found_ms_path, "rb") as f:
             st.download_button(
-                "📥 Download Answer Scheme PDF", 
+                "📥 Download Marking Scheme PDF", 
                 f, 
                 file_name=expected_ms_filename, 
                 mime="application/pdf"
             )
         
-        with st.expander("👁️ Preview Answer Scheme Document"):
+        with st.expander("👁️ Preview Marking Scheme Document"):
             doc = fitz.open(found_ms_path)
             for p in range(len(doc)):
                 img_data = render_pdf_page_preview(found_ms_path, p)
@@ -573,7 +573,7 @@ with tab4:
 
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
 with tab5:
-    st.subheader("🛒 Download Handout in PYP Cart")
+    st.subheader("🛒 Download merged pages as Handout worksheet")
     
     if st.session_state.handout_basket:
         st.subheader("Selected Pages in Your Cart")
