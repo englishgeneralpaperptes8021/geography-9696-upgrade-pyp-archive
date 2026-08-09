@@ -573,7 +573,7 @@ with tab4:
 
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
 with tab5:
-    st.subheader("🛒 Download Handout Merged as Worksheet Management")
+    st.subheader("🛒 Download Handout in PYP Cart")
     
     if st.session_state.handout_basket:
         st.subheader("Selected Pages in Your Cart")
