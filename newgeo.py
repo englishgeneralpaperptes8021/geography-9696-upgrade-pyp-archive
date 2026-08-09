@@ -1,4 +1,4 @@
-# ********** 9696 Geography PYP Portal (8-Folder Architecture) 9/8/26 ***********
+# ********** 9696 Geography PYP Portal (Custom Color Theme) 9th Aug 2026***********
 import datetime
 import io
 import os
@@ -26,63 +26,94 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS Theme (Earthy Geography Theme)
+# Custom CSS Theme Injecting User Specified Color Palette
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #F4F6F0 !important;
+    /* 1. Main Page Background */
+    .stApp, [data-testid="stAppViewContainer"] {
+        background-color: #DCF863 !important;
     }
-    [data-testid="stSidebar"] {
-        background-color: #E2E8D8 !important;
+    
+    /* 2. Sidebar Background */
+    [data-testid="stSidebar"], [data-testid="stSidebar"] > div:first-child {
+        background-color: #F0FCBB !important;
     }
-    [data-testid="stSidebar"] > div:first-child {
-        background-color: #E2E8D8 !important;
+
+    /* 3. Global Text Color (#384403) */
+    html, body, [class*="css"], h1, h2, h3, h4, h5, h6, p, span, label, div, .stMarkdown {
+        color: #384403 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    /* 4. Input Bars, Selectboxes, Text Areas & Borders (#A5C809) */
     div[data-baseweb="input"], 
     div[data-baseweb="select"] > div, 
     .stTextInput input, 
-    .stSelectbox select {
+    .stSelectbox select,
+    textarea {
         background-color: #FFFFFF !important;
-        color: #1E4620 !important;
+        color: #384403 !important;
         border-radius: 8px !important;
-        border: 1px solid #2E6F40 !important;
+        border: 2px solid #A5C809 !important;
     }
-    label, .stWidgetLabel p, h1, h2, h3, h4, h5, h6, p, span {
-        color: #1E4620 !important;
+
+    /* 5. Buttons Styling (#C9F40B with #A5C809 Border) */
+    .stButton button, 
+    .stDownloadButton button, 
+    [data-testid="baseButton-secondary"], 
+    [data-testid="baseButton-primary"] {
+        background-color: #C9F40B !important;
+        color: #384403 !important;
+        border: 2px solid #A5C809 !important;
+        border-radius: 8px !important;
         font-weight: bold !important;
+        transition: all 0.2s ease-in-out;
     }
-    input {
-        color: #1E4620 !important;
-    }
-    .stButton button, .stDownloadButton button, [data-testid="baseButton-secondary"], [data-testid="baseButton-primary"] {
-        background-color: #2E6F40 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #1E4620 !important;
-        font-weight: bold !important;
-    }
+    
+    /* Hover state for buttons */
     .stButton button:hover, .stDownloadButton button:hover {
-        background-color: #1E4620 !important;
-        color: #FFFFFF !important;
+        background-color: #A5C809 !important;
+        color: #384403 !important;
+        border: 2px solid #384403 !important;
+    }
+
+    /* 6. Navigation Tab Labels (BOLD Font Style & #384403 Text) */
+    button[data-baseweb="tab"] p {
+        font-weight: bold !important;
+        font-size: 1.05rem !important;
+        color: #384403 !important;
+    }
+    
+    /* Active Tab Highlight Indicator */
+    div[data-baseweb="tab-highlight"] {
+        background-color: #384403 !important;
+    }
+
+    /* 7. Expanders & Containers Border Color */
+    [data-testid="stExpander"] {
+        border: 1.5px solid #A5C809 !important;
+        border-radius: 8px !important;
+        background-color: #F0FCBB !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 
 # ==========================================
-# 1. CONFIGURATION & DIRECTORY SETUP (8 FOLDERS)
+# 1. DIRECTORY MAPPING & CONFIGURATION
 # ==========================================
 SYLLABUS_CODE = "9696"
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 LOCAL_FOLDERS = {
-    "p1_physical": "9696_Paper1",
-    "p2_human": "9696_Paper2",
-    "p3_adv_physical": "9696_Paper3",
-    "p4_adv_human": "9696_Paper4",
-    "insert_p1_p3": "9696_InsertP1P3",
-    "insert_p2_p4": "9696_InsertP2P4",
-    "ms_p1_p2": "9696_MarkSchemeP1P2",
-    "ms_p3_p4": "9696_MarkSchemeP3P4"
+    "p1_physical": "core_physicalP1",
+    "p2_human": "core_humanP2",
+    "p3_adv_physical": "Adv_physicalP3",
+    "p4_adv_human": "Adv_humanP4",
+    "insert_p1_p3": "Insertpyp_P1P3",
+    "insert_p2_p4": "Insertpyp_P2P4",
+    "ms_p1_p2": "marksch_P1P2",
+    "ms_p3_p4": "marksch_P3P4"
 }
 
 for folder_path in LOCAL_FOLDERS.values():
@@ -92,7 +123,7 @@ for folder_path in LOCAL_FOLDERS.values():
 # 2. SERVICE ACCOUNT AUTHENTICATION & SYNC
 # ==========================================
 def build_drive_service(write_access=False):
-    """Authenticates using Google Service Account credentials stored in st.secrets."""
+    """Authenticates using Google Service Account credentials from Streamlit Secrets."""
     try:
         if "gcp_service_account" in st.secrets:
             service_account_info = dict(st.secrets["gcp_service_account"])
@@ -103,14 +134,14 @@ def build_drive_service(write_access=False):
             )
             return build('drive', 'v3', credentials=creds)
         else:
-            st.error("❌ Missing [gcp_service_account] section in secrets.toml.")
+            st.error("Missing [gcp_service_account] configuration in secrets.")
             return None
     except Exception as e:
-        st.error(f"❌ Service Account Authentication Error: {e}")
+        st.error(f"Authentication Error: {e}")
         return None
 
 def sync_drive_folder_to_local(folder_key: str) -> tuple[int, str]:
-    """Downloads missing files from Google Drive to local directories."""
+    """Downloads missing files from Google Drive folder into local directory."""
     service = build_drive_service(write_access=False)
     if not service:
         return 0, "Failed to authenticate Service Account."
@@ -119,7 +150,7 @@ def sync_drive_folder_to_local(folder_key: str) -> tuple[int, str]:
     drive_folder_id = folder_ids.get(folder_key)
     
     if not drive_folder_id:
-        return 0, f"Missing drive_folder_id for `{folder_key}` in secrets.toml."
+        return 0, f"Missing drive_folder_id for `{folder_key}` in secrets."
 
     local_path = LOCAL_FOLDERS[folder_key]
     
@@ -234,7 +265,7 @@ def add_page_number_to_run(run):
     r.append(fldChar3)
 
 def render_pdf_page_preview(filepath: str, page_num: int = 0):
-    """Renders a PDF page to PNG for in-app preview."""
+    """Renders a PDF page to PNG image bytes for preview."""
     try:
         doc = fitz.open(filepath)
         page = doc.load_page(page_num)
@@ -272,7 +303,7 @@ def execute_pdf_search(folder_key: str, keyword_string: str) -> list[dict]:
     return results
 
 # ==========================================
-# 4. APP STATE INITIALIZATION
+# 4. SESSION STATE INITIALIZATION
 # ==========================================
 if 'handout_basket' not in st.session_state:
     st.session_state.handout_basket = []
@@ -298,28 +329,28 @@ st.subheader(f"🌍 {SYLLABUS_CODE} Geography PYP Resource Library")
 # --- SIDEBAR CONTROLS ---
 with st.sidebar:
     st.header("🔄 Google Drive Sync")
-    if st.button("🔄 Sync Google Drive", type="primary", use_container_width=True):
+    if st.button("🔄 Sync Google Drive", use_container_width=True):
         with st.spinner("Syncing Google Drive folders..."):
             synced_count, sync_msgs = perform_bulk_sync()
-            st.success(f"🎉 Sync Complete! {synced_count} new file(s) downloaded.")
+            st.success(f"Sync Complete! {synced_count} new file(s) downloaded.")
             for m in sync_msgs:
                 st.caption(m)
 
     st.markdown("---")
     st.metric(label="Saved Pages in Basket", value=len(st.session_state.handout_basket))
 
-    if st.button("🗑️ Clear Entire Basket", use_container_width=True):
+    if st.button("🗑️ Clear Basket", use_container_width=True):
         st.session_state.handout_basket = []
         st.rerun()
 
 # --- NAVIGATION TABS ---
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🏔️ Physical Geography (P1/P3)", 
-    "🏙️ Human Geography (P2/P4)", 
-    "🗺️ Inserts (P1-P4)",
-    "🔑 Download Answer", 
-    "🛒 Download Worksheet", 
-    "⚙️ Upload PYP / Admin"
+    "🏔️ Physical Geog", 
+    "🏙️ Human Geog", 
+    "🗺️ PYP Inserts ",
+    "🔑 PYP Answer", 
+    "🛒 PYP Cart", 
+    "⚙️ Upload PYP/Admin"
 ])
 
 # --- TAB 1: PHYSICAL GEOGRAPHY (PAPER 1 or PAPER 3) ---
@@ -329,7 +360,7 @@ with tab1:
     selected_phys_paper = st.selectbox(
         "Select Component Paper:", 
         options=["p1_physical", "p3_adv_physical"],
-        format_func=lambda x: "Paper 1 (12): Core Physical Geography" if x == "p1_physical" else "Paper 3 (32): Advanced Physical Geography Options",
+        format_func=lambda x: "Paper 1 (12): core_physicalP1" if x == "p1_physical" else "Paper 3 (32): Adv_physicalP3",
         key="select_phys_paper"
     )
 
@@ -339,7 +370,7 @@ with tab1:
         key="phys_kw"
     )
 
-    if st.button("Search Keyword", type="primary", key="btn_search_phys"):
+    if st.button("Search Keyword", key="btn_search_phys"):
         if t_kw.strip():
             with st.spinner("Scanning PDFs..."):
                 st.session_state.p1_p3_results = execute_pdf_search(selected_phys_paper, t_kw)
@@ -379,7 +410,7 @@ with tab2:
     selected_human_paper = st.selectbox(
         "Select Component Paper:", 
         options=["p2_human", "p4_adv_human"],
-        format_func=lambda x: "Paper 2 (22): Core Human Geography" if x == "p2_human" else "Paper 4 (42): Advanced Human Geography Options",
+        format_func=lambda x: "Paper 2 (22): core_humanP2" if x == "p2_human" else "Paper 4 (42): Adv_humanP4",
         key="select_human_paper"
     )
 
@@ -389,7 +420,7 @@ with tab2:
         key="human_kw"
     )
 
-    if st.button("Search Keyword", type="primary", key="btn_search_human"):
+    if st.button("Search Keyword", key="btn_search_human"):
         if h_kw.strip():
             with st.spinner("Scanning PDFs..."):
                 st.session_state.p2_p4_results = execute_pdf_search(selected_human_paper, h_kw)
@@ -427,13 +458,13 @@ with tab3:
     st.subheader("🗺️ Geography Inserts Search (Figures, Maps & Tables)")
     
     selected_insert = st.selectbox(
-        "Select Insert Paper target:", 
+        "Select Insert Paper Target:", 
         options=["insert_p1", "insert_p2", "insert_p3", "insert_p4"],
         format_func=lambda x: {
-            "insert_p1": "Insert Paper 1 (Physical Core)",
-            "insert_p2": "Insert Paper 2 (Human Core)",
-            "insert_p3": "Insert Paper 3 (Advanced Physical)",
-            "insert_p4": "Insert Paper 4 (Advanced Human)"
+            "insert_p1": "Insert Paper 1 (Insertpyp_P1P3)",
+            "insert_p2": "Insert Paper 2 (Insertpyp_P2P4)",
+            "insert_p3": "Insert Paper 3 (Insertpyp_P1P3)",
+            "insert_p4": "Insert Paper 4 (Insertpyp_P2P4)"
         }[x],
         key="select_insert_target"
     )
@@ -444,7 +475,6 @@ with tab3:
         key="insert_kw"
     )
 
-    # Map selected insert option to its folder key
     folder_mapping = {
         "insert_p1": "insert_p1_p3",
         "insert_p3": "insert_p1_p3",
@@ -453,7 +483,7 @@ with tab3:
     }
     target_folder_key = folder_mapping[selected_insert]
 
-    if st.button("Search Insert", type="primary", key="btn_search_insert"):
+    if st.button("Search Insert", key="btn_search_insert"):
         if ins_kw.strip():
             with st.spinner("Scanning Inserts..."):
                 st.session_state.insert_results = execute_pdf_search(target_folder_key, ins_kw)
@@ -515,7 +545,6 @@ with tab4:
     st.markdown("---")
     found_ms_path = None
     
-    # Search across both Mark Scheme folders
     for folder_key in ["ms_p1_p2", "ms_p3_p4"]:
         check_path = os.path.join(LOCAL_FOLDERS[folder_key], expected_ms_filename)
         if os.path.exists(check_path):
@@ -523,9 +552,14 @@ with tab4:
             break
 
     if found_ms_path:
-        st.success(f"✅ Found Answer Scheme: `{expected_ms_filename}`")
+        st.success(f"Found Answer Scheme: `{expected_ms_filename}`")
         with open(found_ms_path, "rb") as f:
-            st.download_button("📥 Download Answer Scheme PDF", f, file_name=expected_ms_filename, mime="application/pdf", type="primary")
+            st.download_button(
+                "📥 Download Answer Scheme PDF", 
+                f, 
+                file_name=expected_ms_filename, 
+                mime="application/pdf"
+            )
         
         with st.expander("👁️ Preview Answer Scheme Document"):
             doc = fitz.open(found_ms_path)
@@ -535,7 +569,7 @@ with tab4:
                     st.image(img_data, caption=f"Page {p + 1}", use_container_width=True)
             doc.close()
     else:
-        st.warning(f"⚠️ Mark Scheme `{expected_ms_filename}` was not found locally.")
+        st.warning(f"Mark Scheme `{expected_ms_filename}` was not found locally.")
 
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
 with tab5:
@@ -543,14 +577,14 @@ with tab5:
     
     if st.session_state.handout_basket:
         st.subheader("Selected Pages in Your Cart")
-        st.markdown("Review your items below. Click **DELETE** to remove an individual page.")
+        st.markdown("Review your items below. Click **Remove** to delete an individual page.")
         
         for idx, item in enumerate(st.session_state.handout_basket):
             col_info, col_action = st.columns([4, 1])
             with col_info:
                 st.markdown(f"📄 **Item {idx + 1}:** `{item['file']}` — **Page {item['page'] + 1}**")
             with col_action:
-                if st.button("🔴 DELETE", key=f"del_item_{idx}"):
+                if st.button("🗑️ Remove", key=f"del_item_{idx}"):
                     st.session_state.handout_basket.pop(idx)
                     st.toast(f"Removed item {idx + 1} from cart.")
                     st.rerun()
@@ -567,22 +601,21 @@ with tab5:
             data=doc_buffer,
             file_name=target_filename,
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            type="primary",
             use_container_width=True
         )
     else:
-        st.info("🛒 Your cart is currently empty. Search for questions in Tabs 1–3 and click '➕ Add to Cart' to merge pages here.")
+        st.info("Your cart is currently empty. Search for questions in Tabs 1–3 and click '➕ Add to Cart' to merge pages here.")
 
-# --- TAB 6: UPLOAD PYP / ADMIN (8 FOLDERS) ---
+# --- TAB 6: UPLOAD PYP / ADMIN ---
 with tab6:
     st.subheader("⚙️ Upload PYP / Admin Dashboard")
-    st.caption("Secure admin controls for managing the 8 Google Drive repositories inside parent folder `9696GeogPYP`.")
+    st.caption("Secure admin controls for managing the 8 Google Drive repositories inside parent folder `PYPMaterials_Geo9696`.")
 
     admin_pwd = st.secrets.get("ADMIN_PASSWORD", "")
     pwd_input = st.text_input("Enter Admin Password", type="password", key="admin_pwd_input")
 
     if pwd_input and pwd_input == admin_pwd:
-        st.success("🔓 Authenticated as Administrator")
+        st.success("Authenticated as Administrator")
         st.markdown("---")
         
         admin_tab_links, admin_tab_upload = st.tabs(["📁 Drive Folders & Links", "📤 Direct File Upload"])
@@ -596,17 +629,17 @@ with tab6:
             
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.link_button("📘 Paper 1 Folder", drive_links.get("p1_physical", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🗺️ Insert P1/P3 Folder", drive_links.get("insert_p1_p3", "https://drive.google.com"), use_container_width=True)
+                st.link_button("📘 core_physicalP1", drive_links.get("p1_physical", "https://drive.google.com"), use_container_width=True)
+                st.link_button("🗺️ Insertpyp_P1P3", drive_links.get("insert_p1_p3", "https://drive.google.com"), use_container_width=True)
             with c2:
-                st.link_button("📗 Paper 2 Folder", drive_links.get("p2_human", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🗺️ Insert P2/P4 Folder", drive_links.get("insert_p2_p4", "https://drive.google.com"), use_container_width=True)
+                st.link_button("📗 core_humanP2", drive_links.get("p2_human", "https://drive.google.com"), use_container_width=True)
+                st.link_button("🗺️ Insertpyp_P2P4", drive_links.get("insert_p2_p4", "https://drive.google.com"), use_container_width=True)
             with c3:
-                st.link_button("📙 Paper 3 Folder", drive_links.get("p3_adv_physical", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🔑 MS P1/P2 Folder", drive_links.get("ms_p1_p2", "https://drive.google.com"), use_container_width=True)
+                st.link_button("📙 Adv_physicalP3", drive_links.get("p3_adv_physical", "https://drive.google.com"), use_container_width=True)
+                st.link_button("🔑 marksch_P1P2", drive_links.get("ms_p1_p2", "https://drive.google.com"), use_container_width=True)
             with c4:
-                st.link_button("📕 Paper 4 Folder", drive_links.get("p4_adv_human", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🔑 MS P3/P4 Folder", drive_links.get("ms_p3_p4", "https://drive.google.com"), use_container_width=True)
+                st.link_button("📕 Adv_humanP4", drive_links.get("p4_adv_human", "https://drive.google.com"), use_container_width=True)
+                st.link_button("🔑 marksch_P3P4", drive_links.get("ms_p3_p4", "https://drive.google.com"), use_container_width=True)
 
         with admin_tab_upload:
             st.markdown("### ☁️ Direct Cloud Upload via Service Account")
@@ -615,14 +648,14 @@ with tab6:
                 "Select Destination Repository Folder", 
                 options=list(LOCAL_FOLDERS.keys()),
                 format_func=lambda x: {
-                    "p1_physical": "9696_Paper1 (Core Physical)",
-                    "p2_human": "9696_Paper2 (Core Human)",
-                    "p3_adv_physical": "9696_Paper3 (Advanced Physical)",
-                    "p4_adv_human": "9696_Paper4 (Advanced Human)",
-                    "insert_p1_p3": "9696_InsertP1P3",
-                    "insert_p2_p4": "9696_InsertP2P4",
-                    "ms_p1_p2": "9696_MarkSchemeP1P2",
-                    "ms_p3_p4": "9696_MarkSchemeP3P4"
+                    "p1_physical": "core_physicalP1",
+                    "p2_human": "core_humanP2",
+                    "p3_adv_physical": "Adv_physicalP3",
+                    "p4_adv_human": "Adv_humanP4",
+                    "insert_p1_p3": "Insertpyp_P1P3",
+                    "insert_p2_p4": "Insertpyp_P2P4",
+                    "ms_p1_p2": "marksch_P1P2",
+                    "ms_p3_p4": "marksch_P3P4"
                 }[x],
                 key="admin_upload_category"
             )
@@ -630,14 +663,14 @@ with tab6:
             uploaded_file = st.file_uploader("Choose a PDF file to upload", type=["pdf"], key="admin_file_uploader")
             
             if uploaded_file is not None:
-                if st.button("🚀 Upload File to Google Drive", type="primary", key="execute_upload_btn"):
+                if st.button("🚀 Upload File to Google Drive", key="execute_upload_btn"):
                     with st.spinner("Uploading file to Google Drive repository..."):
                         try:
                             service = build_drive_service(write_access=True)
                             if service:
                                 target_folder_id = drive_folder_ids.get(target_category)
                                 if not target_folder_id:
-                                    st.error(f"❌ Missing drive folder ID for `{target_category}` in secrets.toml.")
+                                    st.error(f"Missing drive folder ID for `{target_category}` in secrets.")
                                 else:
                                     file_metadata = {
                                         'name': uploaded_file.name,
@@ -651,15 +684,15 @@ with tab6:
                                     media = MediaFileUpload(temp_upload_path, mimetype='application/pdf', resumable=True)
                                     file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
                                     
-                                    st.success(f"🎉 Successfully uploaded `{uploaded_file.name}` to Google Drive! (File ID: {file.get('id')})")
+                                    st.success(f"Successfully uploaded `{uploaded_file.name}` to Google Drive! (File ID: {file.get('id')})")
                         except Exception as e:
-                            st.error(f"❌ Upload failed: {e}")
+                            st.error(f"Upload failed: {e}")
 
     elif pwd_input:
-        st.error("❌ Incorrect Admin Password.")
+        st.error("Incorrect Admin Password.")
 
 # ==========================================
-# 7. PORTAL FOOTER
+# 6. PORTAL FOOTER
 # ==========================================
 st.markdown("---")
 SCHOOL_NAME = "Pusat Tingkatan Enam Sengkurong (PTES)"
@@ -668,9 +701,9 @@ DEVELOPER_NAME = "Cikgu Haziqah / Computer Science Department"
 
 footer_html = f"""
 <div style="text-align: center; padding: 15px 0px; font-family: sans-serif;">
-    <p style="margin: 0; font-size: 1.0em; font-weight: bold;">🏫 {SCHOOL_NAME}</p>
-    <p style="margin: 5px 0; font-size: 0.9em; font-style: italic;">"{SCHOOL_VISION}"</p>
-    <p style="margin: 5px 0 0 0; font-size: 0.85em; font-weight: 600;">💻 Developed by {DEVELOPER_NAME}</p>
+    <p style="margin: 0; font-size: 1.0em; font-weight: bold; color: #384403;">🏫 {SCHOOL_NAME}</p>
+    <p style="margin: 5px 0; font-size: 0.9em; font-style: italic; color: #384403;">"{SCHOOL_VISION}"</p>
+    <p style="margin: 5px 0 0 0; font-size: 0.85em; font-weight: 600; color: #384403;">💻 Developed by {DEVELOPER_NAME}</p>
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
