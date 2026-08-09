@@ -53,8 +53,8 @@ st.markdown("""
     textarea {
         background-color: #EFA8F0 !important;
         color: #384403 !important;
-        border-radius: 8px !important;
-        border: 2px solid #A5C809 !important;
+        border-radius: 10px !important;
+        border: 5px solid #A5C809 !important;
     }
 
     /* 5. Buttons Styling (#C9F40B with #A5C809 Border) */
