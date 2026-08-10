@@ -607,7 +607,7 @@ with tab5:
     
     if len(st.session_state.handout_basket) > 0:
         st.markdown(f"### 📋 Review Selected Pages ({len(st.session_state.handout_basket)} items)")
-        st.caption("Review your selected pages below. You can preview them or remove specific items before generating your Word worksheet.")
+        st.warning("Review your selected pages below. You can preview them or remove specific items before generating your Word worksheet.")
         st.markdown("---")
         
         items_to_display = list(st.session_state.handout_basket)
