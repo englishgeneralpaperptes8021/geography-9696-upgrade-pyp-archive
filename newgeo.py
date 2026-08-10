@@ -517,61 +517,99 @@ with tab3:
                         )
 
 # --- TAB 4: DOWNLOAD MARK SCHEME ---
+# --- TAB 4: DOWNLOAD MARK SCHEME ---
 with tab4:
-    st.subheader("🔑 Download PYP Marking Schemes")
+    st.subheader("🔑 Download Answer / Mark Schemes")
+    st.caption("Select the exam session parameters or search your local mark scheme repositories.")
     
     col_y, col_m, col_v = st.columns([1, 2, 2])
     with col_y:
         as_year = st.text_input(
             "Year", 
-            value=str(datetime.datetime.now().year), 
-            placeholder="YYYY", 
+            value="2023", 
+            placeholder="e.g. 2023 or 23", 
             key="as_pyp_year"
         )
     with col_m:
-        as_month = st.selectbox("Select Session", ["June (s)", "November (w)"], key="as_mth")
-        month_code = "s" if "June" in as_month else "w"
+        as_month = st.selectbox(
+            "Select Session", 
+            ["November / Autumn (w)", "June / Summer (s)", "March (m)"], 
+            key="as_mth"
+        )
+        if "June" in as_month:
+            month_code = "s"
+        elif "March" in as_month:
+            month_code = "m"
+        else:
+            month_code = "w"
             
     with col_v:
+        # Added Zone 3 variants (13, 23, 33, 43) commonly used in Brunei/Zone 3
         as_variant = st.selectbox(
             "Select Component Variant", 
-            ["12", "22", "32", "42"], 
+            ["11", "12", "13", "21", "22", "23", "31", "32", "33", "41", "42", "43"], 
+            index=2, # Default to 13
             key="as_var"
         )
 
-    short_year = as_year.strip()[-2:] if len(as_year.strip()) >= 2 else ""
-    expected_ms_filename = f"{SYLLABUS_CODE}_{month_code}{short_year}_ms_{as_variant}.pdf"
+    # Clean the year string (e.g., "2023" -> "23")
+    cleaned_year = as_year.strip()
+    short_year = cleaned_year[-2:] if len(cleaned_year) >= 2 else cleaned_year
+
+    # Search query pattern string e.g. "w23" and "ms" and "13"
+    search_session_tag = f"{month_code}{short_year}"
+    expected_ms_filename = f"{SYLLABUS_CODE}_{search_session_tag}_ms_{as_variant}.pdf"
 
     st.markdown("---")
-    found_ms_path = None
     
-    for folder_key in ["ms_p1_p2", "ms_p3_p4"]:
-        check_path = os.path.join(LOCAL_FOLDERS[folder_key], expected_ms_filename)
-        if os.path.exists(check_path):
-            found_ms_path = check_path
-            break
+    # Flexible local file scanner across mark scheme folders
+    found_ms_files = []
+    target_ms_folders = ["ms_p1_p2", "ms_p3_p4"]
 
-    if found_ms_path:
-        st.success(f"Found Marking Scheme: `{expected_ms_filename}`")
-        with open(found_ms_path, "rb") as f:
-            st.download_button(
-                "📥 Download Marking Scheme PDF", 
-                f, 
-                file_name=expected_ms_filename, 
-                mime="application/pdf"
-            )
+    for folder_key in target_ms_folders:
+        folder_path = LOCAL_FOLDERS[folder_key]
+        if os.path.exists(folder_path):
+            for file in os.listdir(folder_path):
+                if file.endswith(".pdf"):
+                    file_lower = file.lower()
+                    # Flexible check for session code (e.g. w23) and variant (e.g. 13)
+                    if search_session_tag in file_lower and f"ms_{as_variant}" in file_lower:
+                        found_ms_files.append(os.path.join(folder_path, file))
+                    elif search_session_tag in file_lower and f"ms" in file_lower and as_variant in file_lower:
+                        if os.path.join(folder_path, file) not in found_ms_files:
+                            found_ms_files.append(os.path.join(folder_path, file))
+
+    if found_ms_files:
+        st.success(f"Found {len(found_ms_files)} matching Answer Scheme file(s):")
         
-        with st.expander("👁️ Preview Marking Scheme Document"):
-            doc = fitz.open(found_ms_path)
-            for p in range(len(doc)):
-                img_data = render_pdf_page_preview(found_ms_path, p)
+        for ms_path in found_ms_files:
+            ms_filename = os.path.basename(ms_path)
+            
+            with st.expander(f"🔑 Mark Scheme: {ms_filename}", expanded=True):
+                col_dl, col_blank = st.columns([1, 2])
+                with col_dl:
+                    with open(ms_path, "rb") as f:
+                        st.download_button(
+                            label=f"📥 Download {ms_filename}",
+                            data=f,
+                            file_name=ms_filename,
+                            mime="application/pdf",
+                            key=f"dl_ms_btn_{ms_filename}"
+                        )
+                
+                # Render document preview
+                doc = fitz.open(ms_path)
+                st.caption(f"Document contains {len(doc)} page(s). Previewing Page 1:")
+                img_data = render_pdf_page_preview(ms_path, 0)
                 if img_data:
-                    st.image(img_data, caption=f"Page {p + 1}", use_container_width=True)
-            doc.close()
+                    st.image(img_data, caption=f"Preview: {ms_filename} (Page 1)", use_container_width=True)
+                doc.close()
     else:
-        st.warning(f"Mark Scheme `{expected_ms_filename}` was not found locally.")
+        st.warning(f"No Mark Scheme found matching session `{search_session_tag}` and variant `{as_variant}` (Expected pattern: `{expected_ms_filename}`).")
+        st.info("💡 **Tip**: Ensure you have run **Sync Google Drive** from the sidebar so the latest mark scheme PDFs are downloaded from Google Drive into `marksch_P1P2` or `marksch_P3P4`.")
 
-# --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
+############################
+
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
 with tab5:
     st.subheader("🛒 PYP Cart & Worksheet Generator")
