@@ -572,44 +572,10 @@ with tab4:
         st.warning(f"Mark Scheme `{expected_ms_filename}` was not found locally.")
 
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
-with tab5:
-    st.subheader("🛒 Download merged pages as Handout worksheet")
-    
-    if st.session_state.handout_basket:
-        st.subheader("Selected Pages in Your Cart")
-        st.markdown("Review your items below. Click **Remove** to delete an individual page.")
-        
-        for idx, item in enumerate(st.session_state.handout_basket):
-            col_info, col_action = st.columns([4, 1])
-            with col_info:
-                st.markdown(f"📄 **Item {idx + 1}:** `{item['file']}` — **Page {item['page'] + 1}**")
-            with col_action:
-                if st.button("🗑️ Remove", key=f"del_item_{idx}"):
-                    st.session_state.handout_basket.pop(idx)
-                    st.toast(f"Removed item {idx + 1} from cart.")
-                    st.rerun()
-            st.markdown("---")
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.subheader("📝 Export Options")
-        
-        doc_buffer = create_worksheet_docx(st.session_state.handout_basket)
-        target_filename = f"{SYLLABUS_CODE}_Geography_Worksheet.docx"
-
-        st.download_button(
-            label="🪄 Download Merged Word Document Worksheet",
-            data=doc_buffer,
-            file_name=target_filename,
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
-        )
-    else:
-        st.info("Your cart is currently empty. Search for questions in Tabs 1–3 and click '➕ Add to Cart' to merge pages here.")
-
-# --- TAB 6: UPLOAD PYP / ADMIN ---
+# --- TAB 6: UPLOAD PYP / ADMIN DASHBOARD ---
 with tab6:
     st.subheader("⚙️ Upload PYP / Admin Dashboard")
-    st.caption("Secure admin controls for managing the 8 Google Drive repositories inside parent folder `PYPMaterials_Geo9696`.")
+    st.caption("Secure admin access to your 8 Google Drive repositories inside `PYPMaterials_Geo9696`.")
 
     admin_pwd = st.secrets.get("ADMIN_PASSWORD", "")
     pwd_input = st.text_input("Enter Admin Password", type="password", key="admin_pwd_input")
@@ -618,78 +584,35 @@ with tab6:
         st.success("Authenticated as Administrator")
         st.markdown("---")
         
-        admin_tab_links, admin_tab_upload = st.tabs(["📁 Drive Folders & Links", "📤 Direct File Upload"])
+        st.markdown("### 🌐 Google Drive Web Repositories")
+        st.info("💡 **Instructions**: Click any button below to open that specific folder in Google Drive. You can drag and drop your new PDF files directly into the web browser!")
         
         drive_links = st.secrets.get("drive_web_links", {})
-        drive_folder_ids = st.secrets.get("drive_folders", {})
 
-        with admin_tab_links:
-            st.markdown("### 🌐 Google Drive Web Dashboards")
-            st.info("Click below to open any of your 8 Google Drive folders directly in your browser.")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.link_button("📘 core_physicalP1", drive_links.get("p1_physical", "https://drive.google.com"), use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.link_button("🗺️ Insertpyp_P1P3", drive_links.get("insert_p1_p3", "https://drive.google.com"), use_container_width=True)
             
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
-                st.link_button("📘 core_physicalP1", drive_links.get("p1_physical", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🗺️ Insertpyp_P1P3", drive_links.get("insert_p1_p3", "https://drive.google.com"), use_container_width=True)
-            with c2:
-                st.link_button("📗 core_humanP2", drive_links.get("p2_human", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🗺️ Insertpyp_P2P4", drive_links.get("insert_p2_p4", "https://drive.google.com"), use_container_width=True)
-            with c3:
-                st.link_button("📙 Adv_physicalP3", drive_links.get("p3_adv_physical", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🔑 marksch_P1P2", drive_links.get("ms_p1_p2", "https://drive.google.com"), use_container_width=True)
-            with c4:
-                st.link_button("📕 Adv_humanP4", drive_links.get("p4_adv_human", "https://drive.google.com"), use_container_width=True)
-                st.link_button("🔑 marksch_P3P4", drive_links.get("ms_p3_p4", "https://drive.google.com"), use_container_width=True)
-
-        with admin_tab_upload:
-            st.markdown("### ☁️ Direct Cloud Upload via Service Account")
+        with c2:
+            st.link_button("📗 core_humanP2", drive_links.get("p2_human", "https://drive.google.com"), use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.link_button("🗺️ Insertpyp_P2P4", drive_links.get("insert_p2_p4", "https://drive.google.com"), use_container_width=True)
             
-            target_category = st.selectbox(
-                "Select Destination Repository Folder", 
-                options=list(LOCAL_FOLDERS.keys()),
-                format_func=lambda x: {
-                    "p1_physical": "core_physicalP1",
-                    "p2_human": "core_humanP2",
-                    "p3_adv_physical": "Adv_physicalP3",
-                    "p4_adv_human": "Adv_humanP4",
-                    "insert_p1_p3": "Insertpyp_P1P3",
-                    "insert_p2_p4": "Insertpyp_P2P4",
-                    "ms_p1_p2": "marksch_P1P2",
-                    "ms_p3_p4": "marksch_P3P4"
-                }[x],
-                key="admin_upload_category"
-            )
+        with c3:
+            st.link_button("📙 Adv_physicalP3", drive_links.get("p3_adv_physical", "https://drive.google.com"), use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.link_button("🔑 marksch_P1P2", drive_links.get("ms_p1_p2", "https://drive.google.com"), use_container_width=True)
             
-            uploaded_file = st.file_uploader("Choose a PDF file to upload", type=["pdf"], key="admin_file_uploader")
-            
-            if uploaded_file is not None:
-                if st.button("🚀 Upload File to Google Drive", key="execute_upload_btn"):
-                    with st.spinner("Uploading file to Google Drive repository..."):
-                        try:
-                            service = build_drive_service(write_access=True)
-                            if service:
-                                target_folder_id = drive_folder_ids.get(target_category)
-                                if not target_folder_id:
-                                    st.error(f"Missing drive folder ID for `{target_category}` in secrets.")
-                                else:
-                                    file_metadata = {
-                                        'name': uploaded_file.name,
-                                        'parents': [target_folder_id]
-                                    }
-                                    
-                                    temp_upload_path = os.path.join(LOCAL_FOLDERS[target_category], uploaded_file.name)
-                                    with open(temp_upload_path, "wb") as f:
-                                        f.write(uploaded_file.getbuffer())
-                                        
-                                    media = MediaFileUpload(temp_upload_path, mimetype='application/pdf', resumable=True)
-                                    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                                    
-                                    st.success(f"Successfully uploaded `{uploaded_file.name}` to Google Drive! (File ID: {file.get('id')})")
-                        except Exception as e:
-                            st.error(f"Upload failed: {e}")
+        with c4:
+            st.link_button("📕 Adv_humanP4", drive_links.get("p4_adv_human", "https://drive.google.com"), use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.link_button("🔑 marksch_P3P4", drive_links.get("ms_p3_p4", "https://drive.google.com"), use_container_width=True)
 
     elif pwd_input:
         st.error("Incorrect Admin Password.")
+########################################################################################################
 
 # ==========================================
 # 6. PORTAL FOOTER
