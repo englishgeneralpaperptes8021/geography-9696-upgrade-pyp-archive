@@ -606,7 +606,7 @@ with tab5:
     st.subheader("🛒 PYP Cart & Worksheet Generator")
     
     if len(st.session_state.handout_basket) > 0:
-        st.markdown(f"### 📋 Review Selected Pages ({len(st.session_state.handout_basket)} items)")
+        st.caption(f"### 📋 Review Selected Pages ({len(st.session_state.handout_basket)} items)")
         st.warning("Review your selected pages below. You can preview them or remove specific items before generating your Word worksheet.")
         st.markdown("---")
         
