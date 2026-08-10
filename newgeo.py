@@ -81,7 +81,7 @@ st.markdown("""
     button[data-baseweb="tab"] p {
         font-weight: bold !important;
         font-size: 2.05rem !important;
-        color: #055470 !important;
+        color: #384403 !important;
     }
     
     /* Active Tab Highlight Indicator */
