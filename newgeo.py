@@ -51,7 +51,7 @@ st.markdown("""
     .stTextInput input, 
     .stSelectbox select,
     textarea {
-        background-color: #EDE9FB !important; #color of input bar
+        background-color: #CEC2F5 !important; #color of input bar
         color: #A5C809 !important;
         border-radius: 10px !important;
         border: 5px solid #A5C809 !important;
