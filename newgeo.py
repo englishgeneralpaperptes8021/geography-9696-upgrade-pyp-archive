@@ -572,6 +572,64 @@ with tab4:
         st.warning(f"Mark Scheme `{expected_ms_filename}` was not found locally.")
 
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
+# --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
+with tab5:
+    st.subheader("🛒 PYP Cart & Worksheet Generator")
+    
+    # Check if cart contains any saved pages
+    if len(st.session_state.handout_basket) > 0:
+        st.markdown(f"### 📋 Review Selected Pages ({len(st.session_state.handout_basket)} items)")
+        st.caption("Review your selected pages below. You can preview them or remove specific items before generating your Word worksheet.")
+        st.markdown("---")
+        
+        # Iterate over a static shallow copy list to prevent index mutation bugs during reruns
+        items_to_display = list(st.session_state.handout_basket)
+        
+        for idx, item in enumerate(items_to_display):
+            filename = item.get("file", "Unknown File")
+            page_num = item.get("page", 0) + 1
+            file_path = item.get("path", "")
+            
+            with st.expander(f"📄 Item #{idx + 1}: {filename} (Page {page_num})", expanded=True):
+                col_preview, col_action = st.columns([3, 1])
+                
+                with col_preview:
+                    # Render a image preview of the saved page
+                    if os.path.exists(file_path):
+                        img_bytes = render_pdf_page_preview(file_path, item.get("page", 0))
+                        if img_bytes:
+                            st.image(img_bytes, caption=f"Preview: Page {page_num}", use_container_width=True)
+                    else:
+                        st.caption(f"Source file path: `{file_path}`")
+                
+                with col_action:
+                    st.markdown("#### Actions")
+                    # Dynamic deletion button using explicit unique key combinations
+                    remove_key = f"remove_btn_cart_item_{idx}_{filename}_{page_num}"
+                    if st.button("🗑️ Remove Item", key=remove_key, use_container_width=True):
+                        # Safely remove this specific element from session_state
+                        st.session_state.handout_basket.pop(idx)
+                        st.toast(f"Removed item #{idx + 1} from cart!")
+                        st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown("### 📝 Export Worksheet")
+        
+        # Build the merged Word Document using the cart helper function
+        with st.spinner("Generating Word Worksheet..."):
+            doc_buffer = create_worksheet_docx(st.session_state.handout_basket)
+            target_filename = f"{SYLLABUS_CODE}_Geography_Worksheet.docx"
+
+        st.download_button(
+            label="🪄 Download Merged Word Document Worksheet",
+            data=doc_buffer,
+            file_name=target_filename,
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+    else:
+        st.info("🛒 Your PYP Cart is currently empty! Navigate to Physical Geog, Human Geog, or PYP Inserts tabs and click '➕ Add to Cart' to add questions here.")
 # --- TAB 6: UPLOAD PYP / ADMIN DASHBOARD ---
 with tab6:
     st.subheader("⚙️ Upload PYP / Admin Dashboard")
