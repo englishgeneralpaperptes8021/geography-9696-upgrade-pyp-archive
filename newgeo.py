@@ -1,4 +1,4 @@
-# ********** 9696 Geography PYP Portal (Custom Color Theme) 9th Aug 2026***********
+# ********** 9696 Geography PYP Portal (Custom Color Theme) 9th Aug 2026 ***********
 import datetime
 import io
 import os
@@ -51,7 +51,7 @@ st.markdown("""
     .stTextInput input, 
     .stSelectbox select,
     textarea {
-        background-color: #CEC2F5 !important; #color of input bar
+        background-color: #CEC2F5 !important;
         color: #141801 !important;
         border-radius: 10px !important;
         border: 5px solid #A5C809 !important;
@@ -63,7 +63,7 @@ st.markdown("""
     [data-testid="baseButton-secondary"], 
     [data-testid="baseButton-primary"] {
         background-color: #C9F40B !important;
-        color: #384403 !important;               #color of all input TEXT e.g: keyword
+        color: #384403 !important;
         border: 2.3px solid #A5C809 !important;
         border-radius: 8px !important;
         font-weight: bold !important;
@@ -77,7 +77,7 @@ st.markdown("""
         border: 4px solid #384403 !important;
     }
 
-    /* 6. Navigation Tab Labels (BOLD Font Style & #384403 Text) */
+    /* 6. Navigation Tab Labels */
     button[data-baseweb="tab"] p {
         font-weight: bold !important;
         font-size: 2.05rem !important;
@@ -517,7 +517,6 @@ with tab3:
                         )
 
 # --- TAB 4: DOWNLOAD MARK SCHEME ---
-# --- TAB 4: DOWNLOAD MARK SCHEME ---
 with tab4:
     st.subheader("🔑 Download Answer / Mark Schemes")
     st.caption("Select the exam session parameters or search your local mark scheme repositories.")
@@ -544,7 +543,6 @@ with tab4:
             month_code = "w"
             
     with col_v:
-        # Added Zone 3 variants (13, 23, 33, 43) commonly used in Brunei/Zone 3
         as_variant = st.selectbox(
             "Select Component Variant", 
             ["11", "12", "13", "21", "22", "23", "31", "32", "33", "41", "42", "43"], 
@@ -552,17 +550,14 @@ with tab4:
             key="as_var"
         )
 
-    # Clean the year string (e.g., "2023" -> "23")
     cleaned_year = as_year.strip()
     short_year = cleaned_year[-2:] if len(cleaned_year) >= 2 else cleaned_year
 
-    # Search query pattern string e.g. "w23" and "ms" and "13"
     search_session_tag = f"{month_code}{short_year}"
     expected_ms_filename = f"{SYLLABUS_CODE}_{search_session_tag}_ms_{as_variant}.pdf"
 
     st.markdown("---")
     
-    # Flexible local file scanner across mark scheme folders
     found_ms_files = []
     target_ms_folders = ["ms_p1_p2", "ms_p3_p4"]
 
@@ -572,10 +567,9 @@ with tab4:
             for file in os.listdir(folder_path):
                 if file.endswith(".pdf"):
                     file_lower = file.lower()
-                    # Flexible check for session code (e.g. w23) and variant (e.g. 13)
                     if search_session_tag in file_lower and f"ms_{as_variant}" in file_lower:
                         found_ms_files.append(os.path.join(folder_path, file))
-                    elif search_session_tag in file_lower and f"ms" in file_lower and as_variant in file_lower:
+                    elif search_session_tag in file_lower and "ms" in file_lower and as_variant in file_lower:
                         if os.path.join(folder_path, file) not in found_ms_files:
                             found_ms_files.append(os.path.join(folder_path, file))
 
@@ -597,7 +591,6 @@ with tab4:
                             key=f"dl_ms_btn_{ms_filename}"
                         )
                 
-                # Render document preview
                 doc = fitz.open(ms_path)
                 st.caption(f"Document contains {len(doc)} page(s). Previewing Page 1:")
                 img_data = render_pdf_page_preview(ms_path, 0)
@@ -608,19 +601,15 @@ with tab4:
         st.warning(f"No Mark Scheme found matching session `{search_session_tag}` and variant `{as_variant}` (Expected pattern: `{expected_ms_filename}`).")
         st.info("💡 **Tip**: Ensure you have run **Sync Google Drive** from the sidebar so the latest mark scheme PDFs are downloaded from Google Drive into `marksch_P1P2` or `marksch_P3P4`.")
 
-############################
-
 # --- TAB 5: DOWNLOAD HANDOUT MERGED (CART) ---
 with tab5:
     st.subheader("🛒 PYP Cart & Worksheet Generator")
     
-    # Check if cart contains any saved pages
     if len(st.session_state.handout_basket) > 0:
         st.markdown(f"### 📋 Review Selected Pages ({len(st.session_state.handout_basket)} items)")
         st.caption("Review your selected pages below. You can preview them or remove specific items before generating your Word worksheet.")
         st.markdown("---")
         
-        # Iterate over a static shallow copy list to prevent index mutation bugs during reruns
         items_to_display = list(st.session_state.handout_basket)
         
         for idx, item in enumerate(items_to_display):
@@ -632,7 +621,6 @@ with tab5:
                 col_preview, col_action = st.columns([3, 1])
                 
                 with col_preview:
-                    # Render a image preview of the saved page
                     if os.path.exists(file_path):
                         img_bytes = render_pdf_page_preview(file_path, item.get("page", 0))
                         if img_bytes:
@@ -642,10 +630,8 @@ with tab5:
                 
                 with col_action:
                     st.markdown("#### Actions")
-                    # Dynamic deletion button using explicit unique key combinations
                     remove_key = f"remove_btn_cart_item_{idx}_{filename}_{page_num}"
                     if st.button("🗑️ Remove Item", key=remove_key, use_container_width=True):
-                        # Safely remove this specific element from session_state
                         st.session_state.handout_basket.pop(idx)
                         st.toast(f"Removed item #{idx + 1} from cart!")
                         st.rerun()
@@ -654,7 +640,6 @@ with tab5:
         st.markdown("---")
         st.markdown("### 📝 Export Worksheet")
         
-        # Build the merged Word Document using the cart helper function
         with st.spinner("Generating Word Worksheet..."):
             doc_buffer = create_worksheet_docx(st.session_state.handout_basket)
             target_filename = f"{SYLLABUS_CODE}_Geography_Worksheet.docx"
@@ -668,6 +653,7 @@ with tab5:
         )
     else:
         st.info("🛒 Your PYP Cart is currently empty! Navigate to Physical Geog, Human Geog, or PYP Inserts tabs and click '➕ Add to Cart' to add questions here.")
+
 # --- TAB 6: UPLOAD PYP / ADMIN DASHBOARD ---
 with tab6:
     st.subheader("⚙️ Upload PYP / Admin Dashboard")
@@ -708,7 +694,6 @@ with tab6:
 
     elif pwd_input:
         st.error("Incorrect Admin Password.")
-########################################################################################################
 
 # ==========================================
 # 6. PORTAL FOOTER
