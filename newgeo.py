@@ -52,7 +52,7 @@ st.markdown("""
     .stSelectbox select,
     textarea {
         background-color: #EFA8F0 !important;
-        color: #27BEF5 !important;
+        color: #A5C809 !important;
         border-radius: 10px !important;
         border: 5px solid #A5C809 !important;
     }
