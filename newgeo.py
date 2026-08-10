@@ -74,19 +74,19 @@ st.markdown("""
     .stButton button:hover, .stDownloadButton button:hover {
         background-color: #A5C809 !important;
         color: #384403 !important;
-        border: 2px solid #384403 !important;
+        border: 4px solid #384403 !important;
     }
 
     /* 6. Navigation Tab Labels (BOLD Font Style & #384403 Text) */
     button[data-baseweb="tab"] p {
         font-weight: bold !important;
-        font-size: 1.05rem !important;
-        color: #384403 !important;
+        font-size: 2.05rem !important;
+        color: #055470 !important;
     }
     
     /* Active Tab Highlight Indicator */
     div[data-baseweb="tab-highlight"] {
-        background-color: #384403 !important;
+        background-color: #F863E1 !important;
     }
 
     /* 7. Expanders & Containers Border Color */
