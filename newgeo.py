@@ -63,8 +63,8 @@ st.markdown("""
     [data-testid="baseButton-secondary"], 
     [data-testid="baseButton-primary"] {
         background-color: #C9F40B !important;
-        color: #384403 !important;
-        border: 2px solid #A5C809 !important;
+        color: #384403 !important;               #color of all input TEXT e.g: keyword
+        border: 2.3px solid #A5C809 !important;
         border-radius: 8px !important;
         font-weight: bold !important;
         transition: all 0.2s ease-in-out;
