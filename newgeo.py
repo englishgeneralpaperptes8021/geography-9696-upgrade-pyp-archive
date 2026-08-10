@@ -31,7 +31,7 @@ st.markdown("""
     <style>
     /* 1. Main Page Background */
     .stApp, [data-testid="stAppViewContainer"] {
-        background-color: #8FFACB !important;
+        background-color: #63D0F8 !important;
     }
     
     /* 2. Sidebar Background */
